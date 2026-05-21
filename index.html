@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Arijit Singh Music Player</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="player">
+
+  <!-- Album Cover -->
+  <div class="cover">
+    <img 
+      id="cover"
+      src="https://i.scdn.co/image/ab6761610000e5ebfc043bea91ac91c222d235c9"
+      alt="Arijit Singh"
+    >
+  </div>
+
+  <!-- Song Info -->
+  <h2 id="title">Kesariya</h2>
+  <p id="artist">Arijit Singh</p>
+
+  <!-- Audio -->
+  <audio id="audio">
+    
+    <!-- Replace with your downloaded mp3 files -->
+    <source src="songs/kesariya.mp3" type="audio/mp3">
+
+  </audio>
+
+  <!-- Progress -->
+  <div class="progress-container" id="progressContainer">
+    <div class="progress" id="progress"></div>
+  </div>
+
+  <!-- Time -->
+  <div class="time">
+    <span id="currentTime">0:00</span>
+    <span id="duration">0:00</span>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <button id="prev">⏮</button>
+    <button id="play">▶</button>
+    <button id="next">⏭</button>
+  </div>
+
+  <!-- Volume -->
+  <input 
+    type="range" 
+    id="volume" 
+    min="0" 
+    max="1" 
+    step="0.01"
+    value="1"
+  >
+
+  <!-- Playlist -->
+  <ul id="playlist">
+    <li>Kesariya - Arijit Singh</li>
+    <li>Tum Hi Ho - Arijit Singh</li>
+    <li>Ae Dil Hai Mushkil - Arijit Singh</li>
+    <li>Raabta - Arijit Singh</li>
+  </ul>
+
+</div>
+
+<script>
+const songs = [
+  {
+    title: "Kesariya",
+    artist: "Arijit Singh",
+    src: "songs/kesariya.mp3"
+  },
+  {
+    title: "Tum Hi Ho",
+    artist: "Arijit Singh",
+    src: "songs/tumhiho.mp3"
+  },
+  {
+    title: "Ae Dil Hai Mushkil",
+    artist: "Arijit Singh",
+    src: "songs/aedilhai.mp3"
+  },
+  {
+    title: "Raabta",
+    artist: "Arijit Singh",
+    src: "songs/raabta.mp3"
+  }
+];
+
+let index = 0;
+
+const audio = document.getElementById("audio");
+const title = document.getElementById("title");
+const artist = document.getElementById("artist");
+const playBtn = document.getElementById("play");
+const prevBtn = document.getElementById("prev");
+const nextBtn = document.getElementById("next");
+const progress = document.getElementById("progress");
+const progressContainer = document.getElementById("progressContainer");
+const currentTimeEl = document.getElementById("currentTime");
+const durationEl = document.getElementById("duration");
+const volume = document.getElementById("volume");
+const playlist = document.querySelectorAll("#playlist li");
+
+// Load Song
+function loadSong(song) {
+  title.textContent = song.title;
+  artist.textContent = song.artist;
+  audio.src = song.src;
+}
+
+loadSong(songs[index]);
+
+// Play Song
+function playSong() {
+  audio.play();
+  playBtn.textContent = "⏸";
+}
+
+// Pause Song
+function pauseSong() {
+  audio.pause();
+  playBtn.textContent = "▶";
+}
+
+// Play / Pause
+playBtn.addEventListener("click", () => {
+  if(audio.paused) {
+    playSong();
+  } else {
+    pauseSong();
+  }
+});
+
+// Next Song
+function nextSong() {
+  index = (index + 1) % songs.length;
+  loadSong(songs[index]);
+  playSong();
+}
+
+// Previous Song
+function prevSong() {
+  index = (index - 1 + songs.length) % songs.length;
+  loadSong(songs[index]);
+  playSong();
+}
+
+nextBtn.addEventListener("click", nextSong);
+prevBtn.addEventListener("click", prevSong);
+
+// Progress Update
+audio.addEventListener("timeupdate", () => {
+  const { duration, currentTime } = audio;
+
+  const progressPercent = (currentTime / duration) * 100;
+  progress.style.width = progressPercent + "%";
+
+  currentTimeEl.textContent = formatTime(currentTime);
+  durationEl.textContent = formatTime(duration);
+});
+
+// Seek Song
+progressContainer.addEventListener("click", (e) => {
+  const width = progressContainer.clientWidth;
+  const clickX = e.offsetX;
+
+  audio.currentTime = (clickX / width) * audio.duration;
+});
+
+// Format Time
+function formatTime(time) {
+  if(isNaN(time)) return "0:00";
+
+  const mins = Math.floor(time / 60);
+  const secs = Math.floor(time % 60)
+    .toString()
+    .padStart(2, "0");
+
+  return `${mins}:${secs}`;
+}
+
+// Volume Control
+volume.addEventListener("input", () => {
+  audio.volume = volume.value;
+});
+
+// Autoplay Next
+audio.addEventListener("ended", nextSong);
+
+// Playlist Click
+playlist.forEach((item, i) => {
+  item.addEventListener("click", () => {
+    index = i;
+    loadSong(songs[index]);
+    playSong();
+  });
+});
+</script>
+
+</body>
+</html>
